@@ -6,6 +6,5 @@ santa-barbara.osm.xml:
 graph.json: santa-barbara.osm
 	graph/makeGraph.py santa-barbara.osm graph.json
 
-build.js: js/graph.js js/main.js js/log.js
-	uglifyjs --source-map build.js.map --comments all -o build.js js/log.js js/main.js js/graph.js
-	
+build.js: js/graph.js js/main.js js/log.js js/pqueue.js
+	uglifyjs --source-map build.js.map --comments all -o build.js js/log.js js/main.js js/graph.js js/pqueue.js
