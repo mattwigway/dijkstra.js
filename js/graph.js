@@ -25,6 +25,17 @@ Dijkstra = function (graph) {
     .domain([this.max_y, this.min_y])
     .range([3, height - 3]);
 
+  // draw the edges
+  this.svg.selectAll('.edge')
+    .data(this.graph.edges)
+    .enter().append('line')
+    .attr('class', 'edge')
+    .attr('id', function (d) { return 'edge-' + d.from + '-' + d.to })
+    .attr('x1', function (d) { return instance.xscale(instance.graph.nodes[d.from].x) })
+    .attr('x2', function (d) { return instance.xscale(instance.graph.nodes[d.to].x) })
+    .attr('y1', function (d) { return instance.yscale(instance.graph.nodes[d.from].y) })
+    .attr('y2', function (d) { return instance.yscale(instance.graph.nodes[d.to].y) })
+
   // draw the nodes
   var nd = this.svg.selectAll('.node')
     .data(this.graph.nodes)
@@ -37,18 +48,6 @@ Dijkstra = function (graph) {
     .on('click', this.setSelectedNode);
 
   nd.append('title').text(function (d) { return d.name; })
-
-  // draw the edges
-  this.svg.selectAll('.edge')
-    .data(this.graph.edges)
-    .enter().append('line')
-    .attr('class', 'edge')
-    .attr('id', function (d) { return 'edge-' + d.from + '-' + d.to })
-    .attr('x1', function (d) { return instance.xscale(instance.graph.nodes[d.from].x) })
-    .attr('x2', function (d) { return instance.xscale(instance.graph.nodes[d.to].x) })
-    .attr('y1', function (d) { return instance.yscale(instance.graph.nodes[d.from].y) })
-    .attr('y2', function (d) { return instance.yscale(instance.graph.nodes[d.to].y) })
-
     this.render();
 };
 
