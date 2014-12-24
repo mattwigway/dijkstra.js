@@ -1,6 +1,11 @@
 .edge {
   stroke-width: 0.3;
-  stroke: #ccc
+  stroke: #ccc;
+}
+
+.path {
+  stroke-width: 1.5;
+  stroke: #000;
 }
 
 .node {

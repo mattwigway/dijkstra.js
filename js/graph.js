@@ -3,7 +3,7 @@
 Graph = function (graph) {
   var instance = this;
 
-  _.bindAll(this, 'classForNode', 'setSelectedNode', 'step', 'run', 'fillForNode');
+  _.bindAll(this, 'classForNode', 'setSelectedNode', 'step', 'run', 'fillForNode', 'showPath', 'hidePath');
 
   this.graph = graph;
 
@@ -50,7 +50,11 @@ Graph = function (graph) {
     .attr('class', this.classForNode)
     .attr('cx', function (d) { return instance.xscale(d.x) })
     .attr('cy', function (d) { return instance.yscale(d.y) })
-    .on('click', this.setSelectedNode);
+    .on('click', this.setSelectedNode)
+    .on('mouseover', function (d, i) {
+      instance.hidePath(d, i);
+      instance.showPath(d, i);
+    });
 
   nd.append('title').text(function (d) { return d.name; })
 
@@ -109,6 +113,8 @@ Graph.prototype.classForNode = function (nd, idx) {
 Graph.prototype.setSelectedNode = function (nd, idx) {
   log.info('setting node ' + idx + ' (' + this.graph.nodes[idx].name + ') as starting node');
 
+  this.hidePath();
+
   this.startNode = idx;
 
   // scale the cost based on the largest possible cost, by running a dijkstra search
@@ -137,7 +143,7 @@ Graph.prototype.run = function () {
     if (!instance.step()) {
       clearInterval(interval);
     }
-  }, 50);
+  }, 10);
 };
 
 Graph.prototype.fillForNode = function (d, i) {
@@ -150,4 +156,33 @@ Graph.prototype.fillForNode = function (d, i) {
     return d3.hsl(237, s, .50);
   else
     return '#b22';
+};
+
+/**
+ * Event handler to highlight the path back from each node.
+ */
+Graph.prototype.showPath = function (node, idx) {
+  if (node.previous !== undefined && node.previous !== false) {
+    // find the edge
+    var edge = this.svg.select('#edge-' + node.previous + '-' + idx);
+
+    // could be backwards
+    if (edge.empty())
+      edge = this.svg.select('#edge-' + idx + '-' + node.previous);
+
+    if (edge.empty())
+      log.error('no edge from ' + node.previous + ' to ' + idx + ' or vice versa found in rendered graph');
+
+    edge.classed('path', true);
+
+    // recurse!
+    this.showPath(this.graph.nodes[node.previous], node.previous);
+  }
+};
+
+/**
+ * Clear the path.
+ */
+Graph.prototype.hidePath = function () {
+  this.svg.selectAll('.edge').classed('path', false);
 };
