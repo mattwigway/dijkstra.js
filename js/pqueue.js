@@ -35,8 +35,6 @@ PriorityQueue.prototype.add = function(node, cost) {
   while (left != right) {
     var center = Math.floor((right - left) / 2 + left);
 
-    log.debug('center: ' + center + ' left: ' + left + ' right: ' + right);
-
     if (this.costs[center] < cost)
       left = center + 1;
     else
@@ -65,4 +63,11 @@ PriorityQueue.prototype.get = function (count) {
   var cost = this.costs.splice(0, count)[0];
 
   return [node, cost];
+};
+
+/**
+ * Is this priority queue empty?
+ */
+PriorityQueue.prototype.isEmpty = function () {
+  return this.nodes.length == 0;
 }

@@ -1,14 +1,19 @@
 // draw the graph
 
-Dijkstra = function (graph) {
+Graph = function (graph) {
   var instance = this;
 
-  _.bindAll(this, 'classForNode', 'setSelectedNode');
+  _.bindAll(this, 'classForNode', 'setSelectedNode', 'step', 'run', 'fillForNode');
 
   this.graph = graph;
 
   var width = 800;
   var height = 600;
+  var max_cost = 10000;
+
+  this.costscale = d3.scale.linear()
+    .domain([0, max_cost])
+    .range([0, 1]);
 
   this.indexGraph();
 
@@ -48,21 +53,29 @@ Dijkstra = function (graph) {
     .on('click', this.setSelectedNode);
 
   nd.append('title').text(function (d) { return d.name; })
-    this.render();
+
+  this.render();
+
+  d3.select('#run')
+    .on('click', this.run);
+
+  d3.select('#step')
+    .on('click', this.step);
 };
 
 /**
  * Perform the updates that need to be performed to the graph.
  */
- Dijkstra.prototype.render = function () {
+ Graph.prototype.render = function () {
    this.svg.selectAll('.node')
-    .attr('class', this.classForNode);
+    .attr('class', this.classForNode)
+    .attr('fill', this.fillForNode);
  }
 
 /**
  * Build a graph index, creating a neighbors list for each node, with the distance to the next node.
  */
-Dijkstra.prototype.indexGraph = function () {
+Graph.prototype.indexGraph = function () {
   var instance = this;
 
   this.max_x = this.min_x = this.graph.nodes[0].x;
@@ -86,18 +99,55 @@ Dijkstra.prototype.indexGraph = function () {
 /**
  * Get the class for a node.
  */
-Dijkstra.prototype.classForNode = function (nd, idx) {
+Graph.prototype.classForNode = function (nd, idx) {
   if (idx == this.startNode)
     return 'node startNode';
   else
     return 'node';
 }
 
-Dijkstra.prototype.setSelectedNode = function (nd, idx) {
+Graph.prototype.setSelectedNode = function (nd, idx) {
   log.info('setting node ' + idx + ' (' + this.graph.nodes[idx].name + ') as starting node');
 
   this.startNode = idx;
-  // TODO: clear all weights
+
+  // scale the cost based on the largest possible cost, by running a dijkstra search
+  // before so we know the result
+  var dijk = new Dijkstra(this.graph, idx);
+  dijk.run();
+
+  this.costscale.domain([0, dijk.upperCost]);
+
+  this.dijkstra = new Dijkstra(this.graph, idx);
 
   this.render();
+};
+
+Graph.prototype.step = function () {
+  var ret = this.dijkstra.step();
+  this.render();
+  return ret;
+};
+
+Graph.prototype.run = function () {
+  var interval;
+  var instance = this;
+
+  interval = setInterval(function () {
+    if (!instance.step()) {
+      clearInterval(interval);
+    }
+  }, 50);
+};
+
+Graph.prototype.fillForNode = function (d, i) {
+  if (d.cost === undefined || d.cost === false)
+    return d3.hsl(237, 0, .95);
+
+  var s = this.costscale(d.cost);
+
+  if (d.labeled)
+    return d3.hsl(237, s, .50);
+  else
+    return '#b22';
 };
