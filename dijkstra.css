@@ -1,0 +1,15 @@
+.edge {
+  stroke-width: 0.3;
+  stroke: #ccc
+}
+
+.node {
+  fill: #aaa;
+  stroke-width: 0;
+}
+
+.node.startNode {
+  stroke-width: 2;
+  stroke: #f00;
+  color: #a00
+}
