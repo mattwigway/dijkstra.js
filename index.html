@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bootstrap 101 Template</title>
+  <title>Dijkstra's algorithm</title>
 
   <!-- Bootstrap -->
   <!-- Latest compiled and minified CSS -->
@@ -29,6 +29,76 @@
             <button class="btn btn-default" id="run">Run</button>
           </div>
         </div>
+
+      <p><a href="http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijkstra's algorithm</a>
+	is an algorithm for finding the shortest path on a network or graph. A graph, in the mathematical
+	sense, is a collection of nodes or points, which are connected by edges or links which may have
+	some weight. For example, a road network might have intersections represented as nodes,
+	road segments represented as edges, with weights being the length of the segments.
+	The algorithm was invented by Edsger Dijkstra in the late 1950s, and works as follows. First,
+	one identifies a starting node, from which one wants to find a shortest path.
+	Optionally, one then identifies an ending node; without an ending node, shortest paths
+	to every connected node are found. Click on a node in graph above to set a starting location,
+	and then click run to see the algorithm find shortest paths. Put your cursor over a node
+	to see the shortest path to that point.</p>
+
+      <p>Central to the algorithm is the <i>priority queue,</i> which is basically just a
+	sorted list. Also central to the algorithm is the concept of a <i>weight</i> or
+	<i>cost,</i> which is just a measure of distance. This could be geographic distance,
+	time, or some other measure of separation. Every edge, from one node to another, has
+	a weight, and the shortest path from a node <i>a</i> to <i>b</i> is the sequence of edges
+	with the least cumulative weight.</p>
+
+      <p>The algorithm starts by initializing the priority queue, which contains nodes and the
+	cost to reach them. The starting node is inserted into the queue with a cost of 0, and
+	then the algorithm's main loop is started. The loop is as follows:</p>
+
+	<ol>
+	  <li>Pull the lowest-weight node from the priority queue.</li>
+	  <li><i>Label</i> that node with its cost; this is the length of the shortest path from the
+	    starting point to that node. There can be no shorter path, because all of the nodes
+	    remaining in the priority queue have higher costs, so exploring further from them
+	    will never yield a lower-cost path. (This does require that all of the edge costs be nonnegative).</li>
+	  <li>Add all of the neighbors of the node (that is, all of the nodes that are directly
+	    connected to this node by an edge) to the priority queue, with cost being the cost
+	    of the node drawn in step 1 plus the length of the edge that connects it to the neighbor.
+	    If the neighbor is already in the priority queue with a higher cost, change the cost.
+	    If the neighbor is in the priority queue with a lower cost (that is, there is a shorter
+	    way to get to the neighbor without going through this node), do nothing. Finally, if the
+	    neighbor was not in the priority queue or if it was in the priority queue with a higher
+	    cost, record the node drawn in step 1 as the previous node on the shortest path.
+	    This information may be overwritten if a shorter way to the node is discovered.
+	    This allows reconstructing the path to a node by repeatedly looking at the previous node.</li>
+	  <li>Repeat 1&ndash;3 until the destination node is labeled by step 2, or the priority queue is empty,
+	    which means that the destination is unreachable. Without a destination, repeat until the priority
+	    queue is empty to discover all paths in the graph.</li>
+	</ol>
+
+      <p>The visualization above can be initialized by clicking a node to set the the starting location. The
+	starting node will be highlighted in orange. The algorithm can then be run (by clicking the run button) or
+	single stepped (by clicking the single step button). Single-stepping the algorithm draws a single node from
+	the priority queue, labels it, and explores its neighbors. Nodes are colored light gray if they have not been
+	reached, dark red if they are in the priority queue, and on a scale from dark gray to blue (based on low to high cost)
+	if they have been labeled. The red nodes are rougly equidistant from the starting point.
+	The graph is the street grid of the Downtown and Mesa neighborhoods of
+	Santa Barbara, California, USA (in a nod to my <a href="http://geog.ucsb.edu">undergraduate days</a>). Hovering over
+	a labeled node highlights the shortest path to it. Note that a search starting in the downtown area expands
+	in a square, because the streets are a grid and thus the edges of a square are equidistant from the starting point.
+	Since there are many paths exactly the same length through the grid, the algorithm picks the last path explored;
+	this is an implementation detail.</p>
+
+      <p>One of the most useful aspects of Dijkstra's algorithm is that it generates not only shortest paths from <i>a</i>
+	to <i>b</i>, but also from <i>a</i> to all nodes closer than <i>b</i>. This means that it is computationally
+	feasible to generate, for example, <a href="http://www.indicatrix.org/2014/11/01/accessibility-analysis-with-python-and-opentripplanner/">paths from every grocery store to every Census block in Chicago</a>, or <a href="http://www.citylab.com/commute/2013/01/best-maps-weve-seen-sandys-transit-outage-new-york/4488/">every part of New York to every other part, before and after Hurricane Sandy</a>. (I made the first map; credit for the second map goes to co-contributors to <a href="http://www.opentripplanner.org">OpenTripPlanner</a>.)</p>
+
+      <p>There are other methods, known as <i>heuristics</i>, that are used for point-a-to-point-b searches. Rather than simply
+	following every possible path from an origin, as Dijkstra does, they make educated guesses as to which paths
+	are likely to pan out and eliminate paths that, for instance, go long distances away from the destination. This is much how
+	humans plan trips, but does not guarantee the shortest path, especially when different travel modes are involved. For
+	example, the fastest way from Imperial, CA (east of Los Angeles) to Columbus, OH, is probably to drive west to
+	Los Angeles International, in the wrong direction, and then take a non-stop flight. Different heuristics have been developed
+	that attempt to account for this problem. Dijkstra, however, is guaranteed to find the best path regardless of how convoluted
+	it is.</p>
       </div>
     </div>
   </div>
