@@ -3,12 +3,12 @@
 Graph = function (graph) {
   var instance = this;
 
-  _.bindAll(this, 'classForNode', 'setSelectedNode', 'step', 'run', 'fillForNode', 'showPath', 'hidePath');
+  _.bindAll(this, 'classForNode', 'setSelectedNode', 'step', 'toggleRun', 'fillForNode', 'showPath', 'hidePath');
 
   this.graph = graph;
 
   var width = 800;
-  var height = 500;
+  var height = 575;
 
   this.costscale = d3.scale.linear()
     .range([0, 1]);
@@ -31,6 +31,8 @@ Graph = function (graph) {
   this.yscale = d3.scale.linear()
     .domain([this.max_y, this.min_y])
     .range([3, height - 3]);
+
+  this.interval = false;
 
   // draw the edges
   this.svg.selectAll('.edge')
@@ -68,7 +70,7 @@ Graph = function (graph) {
   this.render();
 
   d3.select('#run')
-    .on('click', this.run);
+    .on('click', this.toggleRun);
 
   d3.select('#step')
     .on('click', this.step);
@@ -170,13 +172,25 @@ Graph.prototype.runFast = function () {
 	this.render();
 };
 
+Graph.prototype.toggleRun = function () {
+  if (this.interval !== false) {
+    clearInterval(this.interval);
+    this.interval = false;
+    d3.select('#run').text('Run');
+  }
+  else {
+    this.run();
+    d3.select('#run').text('Stop');
+  }
+};
+
 Graph.prototype.run = function () {
-  var interval;
   var instance = this;
 
-  interval = setInterval(function () {
+  this.interval = setInterval(function () {
     if (!instance.step()) {
-      clearInterval(interval);
+      clearInterval(this.interval);
+      this.interval = false;
     }
   }, 10);
 };
