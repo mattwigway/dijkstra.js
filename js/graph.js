@@ -3,12 +3,12 @@
 Graph = function (graph) {
   var instance = this;
 
-  _.bindAll(this, 'classForNode', 'setSelectedNode', 'step', 'run', 'fillForNode', 'showPath', 'hidePath');
+  _.bindAll(this, 'classForNode', 'setSelectedNode', 'step', 'run', 'fillForNode', 'showPath', 'hidePath', 'showAllPaths');
 
   this.graph = graph;
 
   var width = 800;
-  var height = 600;
+  var height = 500;
   var max_cost = 10000;
 
   this.costscale = d3.scale.linear()
@@ -52,9 +52,14 @@ Graph = function (graph) {
     .attr('cy', function (d) { return instance.yscale(d.y) })
     .on('click', this.setSelectedNode)
     .on('mouseover', function (d, i) {
-      instance.hidePath(d, i);
+      instance.hidePath();
       instance.showPath(d, i);
     });
+
+	// clear a shown path when the mouse leaves the display area
+	this.svg.on('mouseout', function () {
+		instance.hidePath();
+	});
 
   nd.append('title').text(function (d) { return d.name; })
 
@@ -65,6 +70,11 @@ Graph = function (graph) {
 
   d3.select('#step')
     .on('click', this.step);
+
+	d3.select('#spt')
+		.on('click', this.showAllPaths);
+
+	this.done = false;
 };
 
 /**
@@ -94,9 +104,17 @@ Graph.prototype.indexGraph = function () {
     if (node.y < instance.min_y) instance.min_y = node.y;
   });
 
+	this.graph.edgeIdx = {};
+
   this.graph.edges.forEach(function (edge) {
     instance.graph.nodes[edge.from].neighbors.push([edge.to, edge.length]);
     instance.graph.nodes[edge.to].neighbors.push([edge.from, edge.length]);
+
+		instance.graph.edgeIdx[edge.from + '_' + edge.to] = edge;
+		instance.graph.edgeIdx[edge.to + '_' + edge.from] = edge;
+
+    // the number of paths that traverse this edge.
+		edge.count = 0;
   });
 };
 
@@ -114,6 +132,7 @@ Graph.prototype.setSelectedNode = function (nd, idx) {
   log.info('setting node ' + idx + ' (' + this.graph.nodes[idx].name + ') as starting node');
 
   this.hidePath();
+	this.clearAllPaths();
 
   this.startNode = idx;
 
@@ -126,13 +145,24 @@ Graph.prototype.setSelectedNode = function (nd, idx) {
 
   this.dijkstra = new Dijkstra(this.graph, idx);
 
+	this.done = false;
+
+	this.clearAllPaths();
+
   this.render();
 };
 
 Graph.prototype.step = function () {
-  var ret = this.dijkstra.step();
+  this.done = !this.dijkstra.step();
   this.render();
-  return ret;
+  return !this.done;
+};
+
+/** debug hook */
+Graph.prototype.runFast = function () {
+	this.dijkstra.run();
+  this.done = true;
+	this.render();
 };
 
 Graph.prototype.run = function () {
@@ -185,4 +215,55 @@ Graph.prototype.showPath = function (node, idx) {
  */
 Graph.prototype.hidePath = function () {
   this.svg.selectAll('.edge').classed('path', false);
+};
+
+
+/**
+ * Show all paths, after Brandon Martin-Anderson.
+ */
+Graph.prototype.showAllPaths = function () {
+	var instance = this;
+	
+	if (!this.done) {
+		return;
+	}
+
+	var maxCount = 0;
+
+	this.graph.nodes.forEach(function (node, nodeIdx) {
+		while (node.previous !== false) {
+			instance.graph.edgeIdx[node.previous + '_' + nodeIdx].count += 1;
+
+			if (instance.graph.edgeIdx[node.previous + '_' + nodeIdx].count > maxCount)
+				maxCount = instance.graph.edgeIdx[node.previous + '_' + nodeIdx].count;
+
+			nodeIdx = node.previous;
+			node = instance.graph.nodes[nodeIdx];
+		}
+	});
+
+	log.info('most used edge traversal count: ' + maxCount);
+
+	// use a log-scale so well-used paths don't dominate
+	var widthScale = d3.scale.log()
+		.domain([1, maxCount])
+		.range([0.3, 10]);
+
+	this.svg.selectAll('.edge')
+		.style('stroke-width', function (d) { return d.count === 0 ? 0.3 : widthScale(d.count); })
+		.classed('active', function (d) { return d.count > 0 });
+};
+
+/**
+ * return path display to normal
+ */
+Graph.prototype.clearAllPaths = function () {
+	// clear edge counts
+	this.graph.edges.forEach(function (edge) {
+		edge.count = 0;
+	});
+
+	// clear edge count display
+	this.svg.selectAll('.edge')
+		.style('stroke-width', false);
 };

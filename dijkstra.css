@@ -1,10 +1,14 @@
 .edge {
   stroke-width: 0.3;
   stroke: #ccc;
+  stroke-linecap: round;
 }
 
-.path {
-  stroke-width: 1.5;
+.edge.active {
+  stroke: #aaa
+}
+
+.edge.path {
   stroke: #000;
 }
 
