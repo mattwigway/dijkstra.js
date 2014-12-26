@@ -54,7 +54,7 @@ class GraphBuilder(object):
 
     def ways_callback(self, ways):
         for osmid, tags, nodes in ways:
-            if 'highway' in tags and tags['highway'] != 'motorway':
+            if 'highway' in tags and tags['highway'] not in ['motorway', 'motorway_link']:
                 self.ways.append(nodes)
 
                 if 'ref' in tags:
