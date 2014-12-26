@@ -1,0 +1,1 @@
+An implementation and visualization of [Dijkstra's algorithm](http://en.wikipedia.org/wiki/Dijkstra%27s_algorithm), in the browser using JavaScript and [D3](http://www.d3js.org). The documentation is [in the app itself](http://projects.indicatrix.org/dijkstra.js).
