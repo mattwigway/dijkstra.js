@@ -3,17 +3,19 @@
 Graph = function (graph) {
   var instance = this;
 
-  _.bindAll(this, 'classForNode', 'setSelectedNode', 'step', 'run', 'fillForNode', 'showPath', 'hidePath', 'showAllPaths');
+  _.bindAll(this, 'classForNode', 'setSelectedNode', 'step', 'run', 'fillForNode', 'showPath', 'hidePath');
 
   this.graph = graph;
 
   var width = 800;
   var height = 500;
-  var max_cost = 10000;
 
   this.costscale = d3.scale.linear()
-    .domain([0, max_cost])
     .range([0, 1]);
+
+	// used to display widths
+	this.widthscale = d3.scale.log()
+		.range([0.3, 10]);
 
   this.indexGraph();
 
@@ -71,9 +73,6 @@ Graph = function (graph) {
   d3.select('#step')
     .on('click', this.step);
 
-	d3.select('#spt')
-		.on('click', this.showAllPaths);
-
 	this.done = false;
 };
 
@@ -81,9 +80,15 @@ Graph = function (graph) {
  * Perform the updates that need to be performed to the graph.
  */
  Graph.prototype.render = function () {
+	 var instance = this;
+
    this.svg.selectAll('.node')
     .attr('class', this.classForNode)
     .attr('fill', this.fillForNode);
+
+	 this.svg.selectAll('.edge')
+		.style('stroke-width', function (d) { return d.count === 0 ? 0.3 : instance.widthscale(d.count); })
+		.classed('active', function (d) { return d.count > 0 });
  }
 
 /**
@@ -140,8 +145,8 @@ Graph.prototype.setSelectedNode = function (nd, idx) {
   // before so we know the result
   var dijk = new Dijkstra(this.graph, idx);
   dijk.run();
-
   this.costscale.domain([0, dijk.upperCost]);
+	this.widthscale.domain([1, dijk.getMaxCount()]);
 
   this.dijkstra = new Dijkstra(this.graph, idx);
 
@@ -219,50 +224,9 @@ Graph.prototype.hidePath = function () {
 
 
 /**
- * Show all paths, after Brandon Martin-Anderson.
- */
-Graph.prototype.showAllPaths = function () {
-	var instance = this;
-	
-	if (!this.done) {
-		return;
-	}
-
-	var maxCount = 0;
-
-	this.graph.nodes.forEach(function (node, nodeIdx) {
-		while (node.previous !== false) {
-			instance.graph.edgeIdx[node.previous + '_' + nodeIdx].count += 1;
-
-			if (instance.graph.edgeIdx[node.previous + '_' + nodeIdx].count > maxCount)
-				maxCount = instance.graph.edgeIdx[node.previous + '_' + nodeIdx].count;
-
-			nodeIdx = node.previous;
-			node = instance.graph.nodes[nodeIdx];
-		}
-	});
-
-	log.info('most used edge traversal count: ' + maxCount);
-
-	// use a log-scale so well-used paths don't dominate
-	var widthScale = d3.scale.log()
-		.domain([1, maxCount])
-		.range([0.3, 10]);
-
-	this.svg.selectAll('.edge')
-		.style('stroke-width', function (d) { return d.count === 0 ? 0.3 : widthScale(d.count); })
-		.classed('active', function (d) { return d.count > 0 });
-};
-
-/**
- * return path display to normal
+ * return path display to normal after showing the SPT visualization
  */
 Graph.prototype.clearAllPaths = function () {
-	// clear edge counts
-	this.graph.edges.forEach(function (edge) {
-		edge.count = 0;
-	});
-
 	// clear edge count display
 	this.svg.selectAll('.edge')
 		.style('stroke-width', false);

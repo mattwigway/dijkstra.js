@@ -11,6 +11,10 @@ Dijkstra = function (graph, startingNode) {
     node.labeled = false;
   });
 
+  this.graph.edges.forEach(function (edge) {
+    edge.count = 0;
+  });
+
   this.pq = new PriorityQueue();
 
   this.graph.nodes[startingNode].cost = 0;
@@ -55,6 +59,15 @@ Dijkstra.prototype.step = function () {
     }
   });
 
+
+  // keep counts up-to-date
+  while (nd.previous !== false) { 
+    this.graph.edgeIdx[nodeIdx + '_' + nd.previous].count += 1;
+    
+    nodeIdx = nd.previous;
+    nd = this.graph.nodes[nodeIdx];
+  }
+
   return !this.pq.isEmpty();
 }
 
@@ -63,4 +76,11 @@ Dijkstra.prototype.step = function () {
  */
 Dijkstra.prototype.run = function () {
   while (this.step());
+};
+
+/**
+ * @return the highest count of number of paths passing through any edge.
+ */
+Dijkstra.prototype.getMaxCount = function () {
+  return _.reduce(_.pluck(this.graph.edges, 'count'), function (m, v) { return v > m ? v : m });
 };

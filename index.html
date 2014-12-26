@@ -27,7 +27,6 @@
           <div class="btn-group">
             <button class="btn btn-default" id="step">Single-step</button>
             <button class="btn btn-default" id="run">Run</button>
-	    <button class="btn btn-default" id="spt">Show path tree</button>
           </div>
         </div>
 
@@ -86,7 +85,10 @@
 	a labeled node highlights the shortest path to it. Note that a search starting in the downtown area expands
 	in a square, because the streets are a grid and thus the edges of a square are equidistant from the starting point.
 	Since there are many paths exactly the same length through the grid, the algorithm picks the last path explored;
-	this is an implementation detail.</p>
+	this is an implementation detail. As the search progresses, the widths of edges scale based on the number
+	of shortest paths that have used them, as inspired by work by
+	<a href="http://graphserver.github.io/graphserver/gallery.html">Brandon Martin-Anderson</a>. Of course, this weights more heavily
+	paths that lead to areas with more nodes, for instance Santa Barbara City College in the bottom-center.</p>
 
       <p>One of the most useful aspects of Dijkstra's algorithm is that it generates not only shortest paths from <i>a</i>
 	to <i>b</i>, but also from <i>a</i> to all nodes closer than <i>b</i>. This means that it is computationally
