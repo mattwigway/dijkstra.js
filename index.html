@@ -47,14 +47,14 @@
 	<i>cost,</i> which is just a measure of distance. This could be geographic distance,
 	time, or some other measure of separation. Every edge, from one node to another, has
 	a weight, and the shortest path from a node <i>a</i> to <i>b</i> is the sequence of edges
-	with the least cumulative weight.</p>
+	with the least cumulative weight or cost.</p>
 
       <p>The algorithm starts by initializing the priority queue, which contains nodes and the
 	cost to reach them. The starting node is inserted into the queue with a cost of 0, and
 	then the algorithm's main loop is started. The loop is as follows:</p>
 
 	<ol>
-	  <li>Pull the lowest-weight node from the priority queue.</li>
+	  <li>Pull the lowest-cost node from the priority queue.</li>
 	  <li><i>Label</i> that node with its cost; this is the length of the shortest path from the
 	    starting point to that node. There can be no shorter path, because all of the nodes
 	    remaining in the priority queue have higher costs, so exploring further from them
@@ -79,7 +79,7 @@
 	single stepped (by clicking the single step button). Single-stepping the algorithm draws a single node from
 	the priority queue, labels it, and explores its neighbors. Nodes are colored light gray if they have not been
 	reached, dark red if they are in the priority queue, and on a scale from dark gray to blue (based on low to high cost)
-	if they have been labeled. The red nodes are rougly equidistant from the starting point.
+	if they have been labeled. The red nodes are roughly equidistant from the starting point.
 	The graph is the street grid of the Downtown and Mesa neighborhoods of
 	Santa Barbara, California, USA (in a nod to my <a href="http://geog.ucsb.edu">undergraduate days</a>). Hovering over
 	a labeled node highlights the shortest path to it. Note that a search starting in the downtown area expands
@@ -98,9 +98,9 @@
 	following every possible path from an origin, as Dijkstra does, they make educated guesses as to which paths
 	are likely to pan out and eliminate paths that, for instance, go long distances away from the destination. This is much how
 	humans plan trips, but does not guarantee the shortest path, especially when different travel modes are involved. For
-	example, the fastest way from Imperial, CA (east of Los Angeles) to Columbus, OH, is probably to drive west to
+	example, the fastest way from Imperial, California (east of Los Angeles) to Columbus, Ohio, is probably to drive west to
 	Los Angeles International, in the wrong direction, and then take a non-stop flight. Different heuristics have been developed
-	that attempt to account for this problem. Dijkstra, however, is guaranteed to find the best path regardless of how convoluted
+	that attempt to account for this problem. Dijkstra, however, is guaranteed to find the shortest path regardless of how convoluted
 	it is.</p>
 
 
